@@ -6,6 +6,8 @@ from storage import Storage
 # TODO: Implementovat dekorátor @log_action (zapsat do history.log)
 def log_action(func):
     def wrapper(*args, **kwargs):
+        with open("history.log", "a") as log_file:
+            log_file.write(f"Action: {func.__name__}\n")
         # ... logika logování ...
         return func(*args, **kwargs)
     return wrapper
@@ -18,19 +20,27 @@ class InventoryManager:
     @log_action
     def add_product(self, name: str, price: float, quantity: int):
         # TODO: Vytvořit produkt, přidat do self.products, uložit
-        print(f"Produkt {name} přidán.")
+        new_product = Product(name = name, price = price, quantity = quantity)
+        self.products.append(new_product)
+        self.storage.save_products(self.products)
 
     def list_products(self):
         # TODO: Vypsat všechny produkty
-        pass
+        for product in self.products:
+            print(product)
 
     def search_products(self, query: str):
         # TODO: Vyhledat produkty obsahující query v názvu
-        pass
+        results = [p for p in self.products if query.lower() in p._name.lower()]
+        for product in results:
+            print(product)
+
     
     def total_value(self):
         # TODO: Spočítat celkovou hodnotu
-        pass
+        total = sum(p.price * p.quantity for p in self.products)
+        print(f"Celková hodnota skladu: {total} Kč")
+  
 
 def main():
     parser = argparse.ArgumentParser(description="Systém správy skladu")
@@ -61,6 +71,7 @@ def main():
     elif args.command == "search":
         manager.search_products(args.query)
     # TODO: Další příkazy
+
     else:
         parser.print_help()
 
